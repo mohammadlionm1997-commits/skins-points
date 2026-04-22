@@ -58,23 +58,26 @@ if (!username) {
 }
 
 function loadPoints(){
-  db.ref("users/" + userId).once("value").then(function(snapshot){
-    let data = snapshot.val();
+  const userRef = db.ref("users/" + userId);
+  const resetRef = db.ref("resetTime");
 
-    let points = data ? data.points : 0;
-    let lastUpdate = data ? data.lastUpdate : null;
+  Promise.all([userRef.once("value"), resetRef.once("value")])
+  .then(([userSnap, resetSnap]) => {
 
-    // 🔥 التحقق من 24 ساعة
-    if (lastUpdate) {
+    let userData = userSnap.val();
+    let resetTime = resetSnap.val();
+
+    let points = userData ? userData.points : 0;
+    let lastUpdate = userData ? userData.lastUpdate : null;
+
+    if (resetTime && lastUpdate) {
       let last = new Date(lastUpdate);
-      let now = new Date();
+      let reset = new Date(resetTime);
 
-      let diff = (now - last) / 1000 / 60 / 60; // بالساعات
-
-      if (diff >= 24) {
+      if (last < reset) {
         points = 0;
 
-        db.ref("users/" + userId).update({
+        userRef.update({
           points: 0
         });
       }

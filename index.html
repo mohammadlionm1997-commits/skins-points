@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body {
+  background:black;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
+button {
+  padding:20px;
+  font-size:20px;
+  background-color:green;
+  color:white;
+  border:none;
+  border-radius:12px;
+  width:80%;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🔥 نقاطك 🔥</h1>
+<h2>عدد النقاط: <span id="score">0</span></h2>
+
+<button id="btn">إجابة صحيحة +10</button>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB9NqY4AVGS4dRI8HYvWAvHD3o0ppdW18k",
+  authDomain: "skins-app-82ddb.firebaseapp.com",
+  databaseURL: "https://skins-app-82ddb-default-rtdb.firebaseio.com",
+  projectId: "skins-app-82ddb"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+let userId = localStorage.getItem("userId");
+let username = localStorage.getItem("username");
+
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem("userId", userId);
+}
+
+if (!username) {
+  username = prompt("اكتب اسمك:");
+  if (!username) username = "لاعب";
+  localStorage.setItem("username", username);
+}
+
+function loadPoints(){
+  db.ref("users/" + userId).once("value").then(function(snapshot){
+    let points = snapshot.val() ? snapshot.val().points : 0;
+    document.getElementById("score").innerText = points;
+  });
+}
+
+function addPoints(){
+  db.ref("users/" + userId).once("value").then(function(snapshot){
+    let current = snapshot.val() ? snapshot.val().points : 0;
+    let newPoints = current + 10;
+
+    db.ref("users/" + userId).set({
+      name: username,
+      points: newPoints,
+      lastUpdate: new Date().toISOString()
+    });
+
+    document.getElementById("score").innerText = newPoints;
+  });
+}
+
+document.addEventListener("DOMContentLoaded", function(){
+  loadPoints();
+
+  document.getElementById("btn").addEventListener("click", function(){
+    addPoints();
+  });
+});
+</script>
+
+</body>
+</html>

@@ -70,11 +70,9 @@ function loadPoints(){
     let points = userData ? userData.points : 0;
     let lastUpdate = userData ? userData.lastUpdate : null;
 
+    // ✅ التعديل المهم هون
     if (resetTime && lastUpdate) {
-      let last = new Date(lastUpdate);
-      let reset = new Date(resetTime);
-
-      if (last < reset) {
+      if (new Date(lastUpdate).getTime() < new Date(resetTime).getTime()) {
         points = 0;
 
         userRef.update({

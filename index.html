@@ -59,7 +59,27 @@ if (!username) {
 
 function loadPoints(){
   db.ref("users/" + userId).once("value").then(function(snapshot){
-    let points = snapshot.val() ? snapshot.val().points : 0;
+    let data = snapshot.val();
+
+    let points = data ? data.points : 0;
+    let lastUpdate = data ? data.lastUpdate : null;
+
+    // 🔥 التحقق من 24 ساعة
+    if (lastUpdate) {
+      let last = new Date(lastUpdate);
+      let now = new Date();
+
+      let diff = (now - last) / 1000 / 60 / 60; // بالساعات
+
+      if (diff >= 24) {
+        points = 0;
+
+        db.ref("users/" + userId).update({
+          points: 0
+        });
+      }
+    }
+
     document.getElementById("score").innerText = points;
   });
 }

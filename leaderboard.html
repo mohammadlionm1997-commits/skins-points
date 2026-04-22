@@ -1,1 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
+<style>
+body {
+  background:black;
+  color:white;
+  text-align:center;
+  font-family:Arial;
+}
+.item {
+  margin:10px;
+  font-size:18px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🏆 أفضل اللاعبين</h1>
+
+<div id="leaderboard">جارٍ التحميل...</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyB9NqY4AVGS4dRI8HYvWAvHD3o0ppdW18k",
+  authDomain: "skins-app-82ddb.firebaseapp.com",
+  databaseURL: "https://skins-app-82ddb-default-rtdb.firebaseio.com",
+  projectId: "skins-app-82ddb"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+function loadLeaderboard(){
+  db.ref("users").once("value").then(function(snapshot){
+    let data = [];
+
+    snapshot.forEach(child => {
+      data.push({
+        name: child.val().name || "لاعب",
+        points: child.val().points || 0
+      });
+    });
+
+    data.sort((a,b) => b.points - a.points);
+
+    let html = "";
+
+    data.slice(0,10).forEach((user, index) => {
+      html += `<div class="item">
+        🏅 ${index+1} - ${user.name} : ${user.points} نقطة
+      </div>`;
+    });
+
+    document.getElementById("leaderboard").innerHTML = html || "لا يوجد لاعبين";
+  });
+}
+
+document.addEventListener("DOMContentLoaded", loadLeaderboard);
+</script>
+
+</body>
+</html>

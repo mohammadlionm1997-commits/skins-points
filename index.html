@@ -10,15 +10,6 @@ body {
   text-align:center;
   font-family:Arial;
 }
-button {
-  padding:20px;
-  font-size:20px;
-  background-color:green;
-  color:white;
-  border:none;
-  border-radius:12px;
-  width:80%;
-}
 </style>
 </head>
 
@@ -26,8 +17,6 @@ button {
 
 <h1>🔥 نقاطك 🔥</h1>
 <h2>عدد النقاط: <span id="score">0</span></h2>
-
-<button id="btn">إجابة صحيحة +10</button>
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -58,7 +47,7 @@ if (!username) {
   localStorage.setItem("username", username);
 }
 
-/* 🕛 دالة تاريخ اليوم */
+/* 🕛 تاريخ اليوم */
 function getTodayDate(){
   let d = new Date();
   return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();
@@ -78,7 +67,7 @@ function loadPoints(){
 
     let today = getTodayDate();
 
-    /* 🔥 إذا يوم جديد → تصفير */
+    /* 🔥 تصفير يومي */
     if(lastDay !== today){
 
       points = 0;
@@ -97,39 +86,9 @@ function loadPoints(){
 
 }
 
-/* ➕ إضافة نقاط */
-function addPoints(){
-
-  const userRef = db.ref("users/" + userId);
-
-  userRef.once("value").then((snap)=>{
-
-    let data = snap.val();
-
-    let current = data ? data.points : 0;
-    let today = getTodayDate();
-
-    let newPoints = current + 10;
-
-    userRef.set({
-      name: username,
-      points: newPoints,
-      lastDay: today
-    });
-
-    document.getElementById("score").innerText = newPoints;
-
-  });
-
-}
-
 /* تشغيل */
 document.addEventListener("DOMContentLoaded", function(){
-
   loadPoints();
-
-  document.getElementById("btn").addEventListener("click", addPoints);
-
 });
 </script>
 

@@ -47,57 +47,38 @@ if (!username) {
   localStorage.setItem("username", username);
 }
 
-/* 📊 تحميل النقاط */
+/* 📊 تحميل النقاط بشكل مباشر (LIVE) */
 function loadPoints(){
 
   const userRef = db.ref("users/" + userId);
   const resetRef = db.ref("resetTime");
 
-  Promise.all([userRef.once("value"), resetRef.once("value")])
-  .then(([userSnap, resetSnap])=>{
+  /* 🔥 استماع مباشر */
+  userRef.on("value", function(userSnap){
 
-    let data = userSnap.val();
-    let resetTime = resetSnap.val();
+    resetRef.once("value").then((resetSnap)=>{
 
-    let points = data ? data.points : 0;
-    let lastUpdate = data ? data.lastUpdate : null;
+      let data = userSnap.val();
+      let resetTime = resetSnap.val();
 
-    if (resetTime && lastUpdate) {
-      if (new Date(lastUpdate).getTime() < new Date(resetTime).getTime()) {
+      let points = data ? data.points : 0;
+      let lastUpdate = data ? data.lastUpdate : null;
 
-        points = 0;
+      /* 🔥 تصفير حسب resetTime */
+      if (resetTime && lastUpdate) {
+        if (new Date(lastUpdate).getTime() < new Date(resetTime).getTime()) {
 
-        userRef.update({
-          points: 0
-        });
+          points = 0;
+
+          userRef.update({
+            points: 0
+          });
+        }
       }
-    }
 
-    document.getElementById("score").innerText = points;
+      document.getElementById("score").innerText = points;
 
-  });
-
-}
-
-/* ➕ إضافة نقاط */
-function addPoints(value){
-
-  const userRef = db.ref("users/" + userId);
-
-  userRef.once("value").then((snap)=>{
-
-    let data = snap.val();
-
-    let current = data ? data.points : 0;
-    let newPoints = current + value;
-
-    userRef.update({
-      name: username,
-      points: newPoints,
-      lastUpdate: new Date().toISOString()
     });
-
-    document.getElementById("score").innerText = newPoints;
 
   });
 

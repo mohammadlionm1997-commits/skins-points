@@ -21,6 +21,7 @@ body {
   background:#1e293b;
   padding:20px;
   border-radius:15px;
+  transition:0.2s;
 }
 
 h1 {color:#00ffaa;}
@@ -104,14 +105,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-/* 👤 المستخدم */
-let userId = localStorage.getItem("userId");
+/* 👤 user ثابت لكل التطبيق */
+let userId = "player_main_1"; // 🔥 مهم جداً (نفسه بكل الصفحات)
 let username = localStorage.getItem("username");
-
-if (!userId) {
-  userId = "user_" + Math.random().toString(36).substr(2,9);
-  localStorage.setItem("userId", userId);
-}
 
 if (!username) {
   username = prompt("اكتب اسمك:");
@@ -132,7 +128,7 @@ function addPoints(value){
   });
 }
 
-/* 📊 أسئلة */
+/* 📊 الأسئلة (ضيف هون براحتك) */
 let questions = [
 {
 q:"ما هي ذخيرة AWM؟",
@@ -187,17 +183,22 @@ if(i === q.correct){
 score += 3;
 document.getElementById("score").innerText = score;
 
+/* صوت صح */
 document.getElementById("correctSound").play();
 
+/* تأثير */
 document.getElementById("quizBox").classList.add("glow");
 setTimeout(()=>document.getElementById("quizBox").classList.remove("glow"),300);
 
+/* 🔥 إضافة لفايربيس */
 addPoints(3);
 
 }else{
 
+/* صوت خطأ */
 document.getElementById("wrongSound").play();
 
+/* اهتزاز */
 document.getElementById("quizBox").classList.add("shake");
 setTimeout(()=>document.getElementById("quizBox").classList.remove("shake"),300);
 }

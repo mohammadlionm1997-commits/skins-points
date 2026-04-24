@@ -38,7 +38,10 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 function loadLeaderboard(){
-  db.ref("users").once("value").then(function(snapshot){
+
+  /* 🔥 استماع مباشر */
+  db.ref("users").on("value", function(snapshot){
+
     let data = [];
 
     snapshot.forEach(child => {
@@ -48,6 +51,7 @@ function loadLeaderboard(){
       });
     });
 
+    /* ترتيب */
     data.sort((a,b) => b.points - a.points);
 
     let html = "";
@@ -59,7 +63,9 @@ function loadLeaderboard(){
     });
 
     document.getElementById("leaderboard").innerHTML = html || "لا يوجد لاعبين";
+
   });
+
 }
 
 document.addEventListener("DOMContentLoaded", loadLeaderboard);

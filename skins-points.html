@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>المستوى المبتدئ</title>
+
+<title>🎮 اختر الإجابة الصحيحة</title>
 
 <style>
 body {
@@ -13,6 +14,7 @@ body {
   text-align:center;
   padding:15px;
 }
+
 .container {
   max-width:400px;
   margin:auto;
@@ -20,7 +22,14 @@ body {
   padding:20px;
   border-radius:15px;
 }
-h1 {color:#00ffcc;}
+
+h1 {color:#00ffaa;}
+
+img {
+  width:100%;
+  border-radius:10px;
+  margin:10px 0;
+}
 
 .btn {
   display:block;
@@ -34,141 +43,184 @@ h1 {color:#00ffcc;}
   cursor:pointer;
 }
 
-.correct {background:#22c55e !important;}
-.wrong {background:#ef4444 !important;}
+/* صح */
+.correct {
+  background:#22c55e !important;
+}
+
+/* خطأ */
+.wrong {
+  background:#ef4444 !important;
+}
+
+/* اهتزاز */
+@keyframes shake {
+0%{transform:translateX(0);}
+25%{transform:translateX(-5px);}
+50%{transform:translateX(5px);}
+75%{transform:translateX(-5px);}
+100%{transform:translateX(0);}
+}
+.shake {animation:shake 0.3s;}
+
+/* توهج */
+.glow {
+  box-shadow:0 0 20px #22c55e;
+}
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
+<div class="container" id="quizBox">
+
 <h1>🎮 اختر الإجابة</h1>
+
 <div>النقاط: <span id="score">0</span></div>
 
+<img id="image">
+
 <div id="question"></div>
+
 <div id="answers"></div>
+
 </div>
 
-<!-- Firebase -->
+<!-- 🔊 أصوات -->
+<audio id="correctSound" src="https://s5files.mobeasy.com/static/u/47558/file-47558-301122.mp3"></audio>
+<audio id="wrongSound" src="https://s5files.mobeasy.com/static/u/47558/file-47558-45173.mp3"></audio>
+
+<!-- 🔥 Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script>
-// 🔥 إعداد Firebase (نفس تبعك)
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
+  apiKey: "AIzaSyB9NqY4AVGS4dRI8HYvWAvHD3o0ppdW18k",
   databaseURL: "https://skins-app-82ddb-default-rtdb.firebaseio.com"
 };
+
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 👤 المستخدم
+/* 👤 المستخدم */
 let userId = localStorage.getItem("userId");
 let username = localStorage.getItem("username");
 
-if(!userId){
+if (!userId) {
   userId = "user_" + Math.random().toString(36).substr(2,9);
   localStorage.setItem("userId", userId);
 }
 
-if(!username){
+if (!username) {
   username = prompt("اكتب اسمك:");
-  if(!username) username="لاعب";
+  if (!username) username = "لاعب";
   localStorage.setItem("username", username);
 }
 
-// 📊 جلب النقاط
-function loadPoints(){
-  db.ref("users/"+userId).once("value").then(snap=>{
-    let data = snap.val();
-    let points = data ? data.points : 0;
-    document.getElementById("score").innerText = points;
-  });
-}
-
-// ➕ إضافة نقاط
+/* 🔥 إضافة نقاط */
 function addPoints(value){
-  let ref = db.ref("users/"+userId);
-
-  ref.once("value").then(snap=>{
+  db.ref("users/" + userId).once("value").then(snap=>{
     let current = snap.val() ? snap.val().points : 0;
-    let newPoints = current + value;
 
-    ref.update({
+    db.ref("users/" + userId).update({
       name: username,
-      points: newPoints
+      points: current + value,
+      lastUpdate: new Date().toISOString()
     });
-
-    document.getElementById("score").innerText = newPoints;
   });
 }
 
-// ❓ الأسئلة
+/* 📊 أسئلة */
 let questions = [
 {
 q:"ما هي ذخيرة AWM؟",
+img:"https://i.postimg.cc/YSN5bkNy/1.png",
 a:["7.62","5.56",".300 Magnum","9mm"],
 correct:2
 },
 {
 q:"أفضل خوذة؟",
-a:["لفل1","لفل2","لفل3","لا يوجد"],
+img:"https://i.postimg.cc/g0yCNdyS/3.png",
+a:["1","2","3","لا فرق"],
 correct:2
 },
 {
 q:"سلاح قنص؟",
+img:"https://i.postimg.cc/3wjsn7jL/4.png",
 a:["SMG","AR","SR","Shotgun"],
 correct:2
 }
 ];
 
 let current = 0;
+let score = 0;
 
-// تحميل السؤال
 function loadQuestion(){
-  let q = questions[current];
-  document.getElementById("question").innerText = q.q;
 
-  let answersDiv = document.getElementById("answers");
-  answersDiv.innerHTML = "";
+let q = questions[current];
 
-  q.a.forEach((ans,i)=>{
-    let btn = document.createElement("button");
-    btn.className="btn";
-    btn.innerText=ans;
+document.getElementById("question").innerText = q.q;
+document.getElementById("image").src = q.img;
 
-    btn.onclick=()=>{
-      let buttons = document.querySelectorAll(".btn");
+let answersDiv = document.getElementById("answers");
+answersDiv.innerHTML = "";
 
-      buttons.forEach((b,index)=>{
-        if(index===q.correct) b.classList.add("correct");
-        if(index===i && i!==q.correct) b.classList.add("wrong");
-        b.disabled=true;
-      });
+q.a.forEach((ans,i)=>{
 
-      // ✅ الصح = 3 نقاط
-      if(i===q.correct){
-        addPoints(3);
-      }
+let btn = document.createElement("button");
+btn.className="btn";
+btn.innerText=ans;
 
-      setTimeout(()=>{
-        current++;
-        if(current<questions.length){
-          loadQuestion();
-        }else{
-          alert("خلصت اللعبة 🎉");
-          current=0;
-          loadQuestion();
-        }
-      },1000);
-    };
+btn.onclick = ()=>{
 
-    answersDiv.appendChild(btn);
-  });
+let buttons = document.querySelectorAll(".btn");
+
+buttons.forEach((b,index)=>{
+if(index===q.correct) b.classList.add("correct");
+if(index===i && i!==q.correct) b.classList.add("wrong");
+});
+
+if(i === q.correct){
+
+score += 3;
+document.getElementById("score").innerText = score;
+
+document.getElementById("correctSound").play();
+
+document.getElementById("quizBox").classList.add("glow");
+setTimeout(()=>document.getElementById("quizBox").classList.remove("glow"),300);
+
+addPoints(3);
+
+}else{
+
+document.getElementById("wrongSound").play();
+
+document.getElementById("quizBox").classList.add("shake");
+setTimeout(()=>document.getElementById("quizBox").classList.remove("shake"),300);
 }
 
-// تشغيل
-loadPoints();
+buttons.forEach(b=>b.disabled=true);
+
+setTimeout(()=>{
+current++;
+if(current < questions.length){
+loadQuestion();
+}else{
+alert("خلصت اللعبة 🎉 مجموعك: " + score);
+}
+},1000);
+
+};
+
+answersDiv.appendChild(btn);
+
+});
+
+}
+
 loadQuestion();
 
 </script>

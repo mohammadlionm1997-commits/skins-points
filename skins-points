@@ -1,1 +1,177 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>المستوى المبتدئ</title>
 
+<style>
+body {
+  background:#0f172a;
+  color:white;
+  font-family:Arial;
+  text-align:center;
+  padding:15px;
+}
+.container {
+  max-width:400px;
+  margin:auto;
+  background:#1e293b;
+  padding:20px;
+  border-radius:15px;
+}
+h1 {color:#00ffcc;}
+
+.btn {
+  display:block;
+  width:100%;
+  margin:8px 0;
+  padding:12px;
+  border:none;
+  border-radius:10px;
+  background:#334155;
+  color:white;
+  cursor:pointer;
+}
+
+.correct {background:#22c55e !important;}
+.wrong {background:#ef4444 !important;}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>🎮 اختر الإجابة</h1>
+<div>النقاط: <span id="score">0</span></div>
+
+<div id="question"></div>
+<div id="answers"></div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+// 🔥 إعداد Firebase (نفس تبعك)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  databaseURL: "https://skins-app-82ddb-default-rtdb.firebaseio.com"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// 👤 المستخدم
+let userId = localStorage.getItem("userId");
+let username = localStorage.getItem("username");
+
+if(!userId){
+  userId = "user_" + Math.random().toString(36).substr(2,9);
+  localStorage.setItem("userId", userId);
+}
+
+if(!username){
+  username = prompt("اكتب اسمك:");
+  if(!username) username="لاعب";
+  localStorage.setItem("username", username);
+}
+
+// 📊 جلب النقاط
+function loadPoints(){
+  db.ref("users/"+userId).once("value").then(snap=>{
+    let data = snap.val();
+    let points = data ? data.points : 0;
+    document.getElementById("score").innerText = points;
+  });
+}
+
+// ➕ إضافة نقاط
+function addPoints(value){
+  let ref = db.ref("users/"+userId);
+
+  ref.once("value").then(snap=>{
+    let current = snap.val() ? snap.val().points : 0;
+    let newPoints = current + value;
+
+    ref.update({
+      name: username,
+      points: newPoints
+    });
+
+    document.getElementById("score").innerText = newPoints;
+  });
+}
+
+// ❓ الأسئلة
+let questions = [
+{
+q:"ما هي ذخيرة AWM؟",
+a:["7.62","5.56",".300 Magnum","9mm"],
+correct:2
+},
+{
+q:"أفضل خوذة؟",
+a:["لفل1","لفل2","لفل3","لا يوجد"],
+correct:2
+},
+{
+q:"سلاح قنص؟",
+a:["SMG","AR","SR","Shotgun"],
+correct:2
+}
+];
+
+let current = 0;
+
+// تحميل السؤال
+function loadQuestion(){
+  let q = questions[current];
+  document.getElementById("question").innerText = q.q;
+
+  let answersDiv = document.getElementById("answers");
+  answersDiv.innerHTML = "";
+
+  q.a.forEach((ans,i)=>{
+    let btn = document.createElement("button");
+    btn.className="btn";
+    btn.innerText=ans;
+
+    btn.onclick=()=>{
+      let buttons = document.querySelectorAll(".btn");
+
+      buttons.forEach((b,index)=>{
+        if(index===q.correct) b.classList.add("correct");
+        if(index===i && i!==q.correct) b.classList.add("wrong");
+        b.disabled=true;
+      });
+
+      // ✅ الصح = 3 نقاط
+      if(i===q.correct){
+        addPoints(3);
+      }
+
+      setTimeout(()=>{
+        current++;
+        if(current<questions.length){
+          loadQuestion();
+        }else{
+          alert("خلصت اللعبة 🎉");
+          current=0;
+          loadQuestion();
+        }
+      },1000);
+    };
+
+    answersDiv.appendChild(btn);
+  });
+}
+
+// تشغيل
+loadPoints();
+loadQuestion();
+
+</script>
+
+</body>
+</html>

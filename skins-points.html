@@ -21,7 +21,6 @@ body {
   background:#1e293b;
   padding:20px;
   border-radius:15px;
-  transition:0.2s;
 }
 
 h1 {color:#00ffaa;}
@@ -44,17 +43,9 @@ img {
   cursor:pointer;
 }
 
-/* صح */
-.correct {
-  background:#22c55e !important;
-}
+.correct {background:#22c55e !important;}
+.wrong {background:#ef4444 !important;}
 
-/* خطأ */
-.wrong {
-  background:#ef4444 !important;
-}
-
-/* اهتزاز */
 @keyframes shake {
 0%{transform:translateX(0);}
 25%{transform:translateX(-5px);}
@@ -64,10 +55,7 @@ img {
 }
 .shake {animation:shake 0.3s;}
 
-/* توهج */
-.glow {
-  box-shadow:0 0 20px #22c55e;
-}
+.glow {box-shadow:0 0 20px #22c55e;}
 </style>
 
 </head>
@@ -88,11 +76,9 @@ img {
 
 </div>
 
-<!-- 🔊 أصوات -->
 <audio id="correctSound" src="https://s5files.mobeasy.com/static/u/47558/file-47558-301122.mp3"></audio>
 <audio id="wrongSound" src="https://s5files.mobeasy.com/static/u/47558/file-47558-45173.mp3"></audio>
 
-<!-- 🔥 Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -103,9 +89,6 @@ const firebaseConfig = {
 };
 
 firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-/* 👤 user ثابت لكل التطبيق */
 const db = firebase.database();
 
 /* 👤 المستخدم */
@@ -137,7 +120,7 @@ function addPoints(value){
   });
 }
 
-/* 📊 الأسئلة (ضيف هون براحتك) */
+/* 📊 الأسئلة */
 let questions = [
 {
 q:"ما هي ذخيرة AWM؟",
@@ -192,22 +175,17 @@ if(i === q.correct){
 score += 3;
 document.getElementById("score").innerText = score;
 
-/* صوت صح */
 document.getElementById("correctSound").play();
 
-/* تأثير */
 document.getElementById("quizBox").classList.add("glow");
 setTimeout(()=>document.getElementById("quizBox").classList.remove("glow"),300);
 
-/* 🔥 إضافة لفايربيس */
 addPoints(3);
 
 }else{
 
-/* صوت خطأ */
 document.getElementById("wrongSound").play();
 
-/* اهتزاز */
 document.getElementById("quizBox").classList.add("shake");
 setTimeout(()=>document.getElementById("quizBox").classList.remove("shake"),300);
 }

@@ -106,7 +106,16 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 /* 👤 user ثابت لكل التطبيق */
-let userId = "player_main_1"; // 🔥 مهم جداً (نفسه بكل الصفحات)
+const db = firebase.database();
+
+/* 👤 المستخدم */
+let userId = localStorage.getItem("userId");
+
+if (!userId) {
+  userId = "user_" + Math.random().toString(36).substr(2, 9);
+  localStorage.setItem("userId", userId);
+}
+
 let username = localStorage.getItem("username");
 
 if (!username) {
